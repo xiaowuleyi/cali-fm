@@ -12,17 +12,16 @@ export const podcastConfig: PodcastConfig = {
    *   Pocket Casts Castro, 小宇宙, 哔哩哔哩, YouTube
    */
   directories: [
-    'https://podcasts.apple.com/us/podcast/lex-fridman-podcast/id1434243584',
-    'https://open.spotify.com/show/2MAi0BvDc6GTFvKFPXnkCL',
-    'https://www.youtube.com/lexfridman',
+    'https://www.xiaoyuzhoufm.com/podcast/6182a6bfa5c06b96b9c9313e',
+    'https://www.youtube.com/xiaowuleyi',
   ],
   /**
    * Step 2. Add your podcast hosts here
    */
   hosts: [
     {
-      name: 'Lex Fridman',
-      link: 'https://lexfridman.com/',
+      name: '小吴乐意',
+      link: 'https://xiaowuleyi.com/',
     },
   ],
 }
