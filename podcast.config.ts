@@ -1,6 +1,13 @@
 import { cache } from 'react'
 import { parse } from 'rss-to-json'
 
+import type { SupportedDirectory } from './app/[locale]/PodcastDirectoryLink'
+
+type PodcastConfig = {
+  directories: SupportedDirectory[]
+  hosts: Host[]
+}
+
 /**
  * TODO: Add your podcast config here
  */
@@ -67,7 +74,7 @@ function encodeEpisodeId(raw: string): string {
 export const getPodcastEpisodes = cache(async () => {
   const feed = await parse(process.env.NEXT_PUBLIC_PODCAST_RSS || '')
   const episodes: Episode[] = feed.items.map((item) => ({
-    id: encodeEpisodeId(item.id),
+    id: encodeEpisodeId(item.id ?? item.link),
     title: item.title,
     description: item.description,
     link: item.link,
@@ -87,5 +94,7 @@ export const getPodcastEpisodes = cache(async () => {
 export const getPodcastEpisode = cache(async (id: string) => {
   const episodes = await getPodcastEpisodes()
   const decodedId = decodeURIComponent(id)
-  return episodes.find((episode) => episode.id === decodedId)
+  return episodes.find(
+    (episode) => episode.id === decodedId || episode.link.endsWith(decodedId)
+  )
 })

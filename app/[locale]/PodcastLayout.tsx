@@ -1,6 +1,7 @@
 'use client'
 
 import { clsxm } from '@zolplay/utils'
+import { compile } from 'html-to-text'
 import { ActivityIcon, Mic2Icon, UserIcon } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -80,13 +81,25 @@ function Waveform(props: React.SVGProps<SVGSVGElement>) {
   )
 }
 
-function AboutSection(
-  props: React.HTMLProps<HTMLElement> & { children: string }
-) {
-  const content = props.children
+type AboutSectionProps = Omit<React.HTMLProps<HTMLElement>, 'children'> & {
+  children?: string
+}
+
+const compiler = compile()
+function AboutSection(props: AboutSectionProps) {
+  const rawContent = props.children ?? ''
   const [isExpanded, setIsExpanded] = useState(false)
-  const isTooLong = useMemo(() => content.length > 150, [content])
+  const content = useMemo(() => {
+    const text = compiler(rawContent)
+    if (isExpanded) {
+      return text
+    }
+
+    const isTooLong = text.length > 150
+    return `${text.substring(0, 150)}${isTooLong ? '...' : ''}`
+  }, [isExpanded, rawContent])
   const [mounted, setMounted] = useState(false)
+  const showMore = mounted && content.length > 150 && !isExpanded
   const t = useTranslations('Layout')
 
   useEffect(() => setMounted(true), [])
@@ -103,7 +116,7 @@ function AboutSection(
           !isExpanded && 'lg:line-clamp-4'
         )}
       >
-        {mounted && (
+        {mounted ? (
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             components={{
@@ -122,12 +135,14 @@ function AboutSection(
           >
             {content}
           </ReactMarkdown>
+        ) : (
+          '...'
         )}
       </p>
-      {!isExpanded && isTooLong && (
+      {showMore && (
         <button
           type="button"
-          className="mt-2 hidden text-sm font-bold leading-6 text-blue-500 hover:text-blue-700 active:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200 dark:active:text-blue-100 lg:inline-block"
+          className="mt-2 inline-block text-sm font-bold leading-6 text-blue-500 hover:text-blue-700 active:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200 dark:active:text-blue-100"
           onClick={() => setIsExpanded(true)}
         >
           {t('show_more')}
@@ -183,7 +198,7 @@ export function PodcastLayout({
             <div className="h-px bg-gradient-to-r from-stone-200/0 via-stone-200 to-stone-200/0 dark:from-neutral-700/0 dark:via-neutral-700 dark:to-neutral-700/0 lg:hidden" />
             <ul
               role="list"
-              className="mt-4 flex items-center justify-center gap-4 py-5 text-base font-medium leading-7 text-stone-700 dark:text-neutral-300 lg:justify-start lg:py-0"
+              className="mt-4 flex flex-wrap items-center justify-center gap-4 py-5 text-base font-medium leading-7 text-stone-700 dark:text-neutral-300 lg:justify-start lg:py-0"
             >
               {podcastConfig.directories.map((directory, idx) => (
                 <li key={idx} className="flex">
